@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Quiz - Questions</title>
+    <link rel="icon" href="favicon.jpg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #6a0dad, #8e44ad);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: #fff;
+            color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #6a0dad;
+        }
+
+        .question {
+            margin: 20px 0;
+        }
+
+        .options {
+            margin: 10px 0;
+        }
+
+        .option {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: #6a0dad;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #5a0dad;
+        }
+
+        .timer {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tech Quiz</h1>
+        <div id="quiz-container">
+            <div class="timer" id="timer">Time left: <span id="time">15</span> seconds</div>
+            <div id="question-container" class="question"></div>
+            <div class="options" id="options-container"></div>
+            <button id="next-btn" class="btn" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the primary purpose of a neural network?",
+                options: ["Image Recognition", "Data Compression", "Modeling Complex Relationships", "None of the above"],
+                answer: 2
+            },
+            {
+                question: "Which algorithm is commonly used for classification tasks?",
+                options: ["K-means", "Decision Trees", "Linear Regression", "PCA"],
+                answer: 1
+            },
+            {
+                question: "What does 'overfitting' refer to?",
+                options: ["Model performs well on training data but poorly on unseen data", "Model performs well on unseen data", "Increasing the model size", "None of the above"],
+                answer: 0
+            },
+            {
+                question: "Which of the following is a type of unsupervised learning?",
+                options: ["Classification", "Regression", "Clustering", "All of the above"],
+                answer: 2
+            },
+            {
+                question: "What is the purpose of backpropagation in neural networks?",
+                options: ["To initialize weights", "To adjust weights", "To normalize data", "To apply activation functions"],
+                answer: 1
+            },
+            {
+                question: "What is a common activation function used in neural networks?",
+                options: ["Sigmoid", "Linear", "ReLU", "All of the above"],
+                answer: 3
+            },
+            {
+                question: "Which framework is commonly used for deep learning?",
+                options: ["Pandas", "NumPy", "TensorFlow", "Matplotlib"],
+                answer: 2
+            },
+            {
+                question: "What is the main goal of supervised learning?",
+                options: ["To find hidden patterns", "To predict outcomes based on labeled data", "To group data", "None of the above"],
+                answer: 1
+            },
+            {
+                question: "Which of the following is not a type of deep learning model?",
+                options: ["Convolutional Neural Network", "Recurrent Neural Network", "Random Forest", "Generative Adversarial Network"],
+                answer: 2
+            },
+            {
+                question: "What is 'gradient descent' used for?",
+                options: ["To optimize the model", "To calculate accuracy", "To normalize inputs", "None of the above"],
+                answer: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = []; // Store user answers
+        let timer;
+
+        function loadQuestion() {
+            if (currentQuestion < questions.length) {
+                const questionContainer = document.getElementById('question-container');
+                const optionsContainer = document.getElementById('options-container');
+                const timerDisplay = document.getElementById('time');
+
+                questionContainer.innerText = questions[currentQuestion].question;
+                optionsContainer.innerHTML = '';
+
+                questions[currentQuestion].options.forEach((option, index) => {
+                    optionsContainer.innerHTML += `
+                        <label class="option">
+                            <input type="radio" name="option" value="${index}">
+                            ${option}
+                        </label>
+                    `;
+                });
+
+                // Reset timer
+                let timeLeft = 15;
+                timerDisplay.innerText = timeLeft;
+
+                clearInterval(timer);
+                timer = setInterval(() => {
+                    timeLeft--;
+                    timerDisplay.innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        nextQuestion(); // Automatically go to next question if time is up
+                    }
+                }, 1000);
+            } else {
+                clearInterval(timer);
+                displayResults();
+            }
+        }
+
+        function nextQuestion() {
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            if (selectedOption) {
+                const answer = parseInt(selectedOption.value);
+                userAnswers.push(answer); // Save user's answer
+                if (answer === questions[currentQuestion].answer) {
+                    score++;
+                }
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                alert("Please select an option.");
+            }
+        }
+
+        function displayResults() {
+            localStorage.setItem("userAnswers", JSON.stringify(userAnswers)); // Store answers in local storage
+            localStorage.setItem("score", score); // Store score in local storage
+            window.location.href = 'results.html'; // Redirect to results page
+        }
+
+        // Load the first question
+        loadQuestion();
+    </script>
+
+</body>
+</html>
+

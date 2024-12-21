@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6f2cad, #d0b3ff); /* Gradient background */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh; /* Ensures the background covers the entire screen */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .correct {
+            background-color: #c8e6c9; /* Light green for correct answers */
+        }
+
+        .incorrect {
+            background-color: #ffcdd2; /* Light red for incorrect answers */
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #6f2cad;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #5a0dad;
+        }
+
+        .summary {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quiz Results</h1>
+        <h2>Your Score: <span id="score"></span> / 10</h2>
+        <h2 id="percentage"></h2>
+        <div class="feedback" id="feedback"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody id="results-container"></tbody>
+        </table>
+        <div class="summary">
+            <p id="correctCount"></p>
+            <p id="incorrectCount"></p>
+        </div>
+        <button class="btn" onclick="retakeQuiz()">Retake Quiz</button>
+        <button class="btn" onclick="goHome()">Go to Home</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the primary purpose of a neural network?",
+                options: ["Image Recognition", "Data Compression", "Modeling Complex Relationships", "None of the above"],
+                answer: 2
+            },
+            {
+                question: "Which algorithm is commonly used for classification tasks?",
+                options: ["K-means", "Decision Trees", "Linear Regression", "PCA"],
+                answer: 1
+            },
+            {
+                question: "What does 'overfitting' refer to?",
+                options: ["Model performs well on training data but poorly on unseen data", "Model performs well on unseen data", "Increasing the model size", "None of the above"],
+                answer: 0
+            },
+            {
+                question: "Which of the following is a type of unsupervised learning?",
+                options: ["Classification", "Regression", "Clustering", "All of the above"],
+                answer: 2
+            },
+            {
+                question: "What is the purpose of backpropagation in neural networks?",
+                options: ["To initialize weights", "To adjust weights", "To normalize data", "To apply activation functions"],
+                answer: 1
+            },
+            {
+                question: "What is a common activation function used in neural networks?",
+                options: ["Sigmoid", "Linear", "ReLU", "All of the above"],
+                answer: 3
+            },
+            {
+                question: "Which framework is commonly used for deep learning?",
+                options: ["Pandas", "NumPy", "TensorFlow", "Matplotlib"],
+                answer: 2
+            },
+            {
+                question: "What is the main goal of supervised learning?",
+                options: ["To find hidden patterns", "To predict outcomes based on labeled data", "To group data", "None of the above"],
+                answer: 1
+            },
+            {
+                question: "Which of the following is not a type of deep learning model?",
+                options: ["Convolutional Neural Network", "Recurrent Neural Network", "Random Forest", "Generative Adversarial Network"],
+                answer: 2
+            },
+            {
+                question: "What is 'gradient descent' used for?",
+                options: ["To optimize the model", "To calculate accuracy", "To normalize inputs", "None of the above"],
+                answer: 0
+            }
+        ];
+
+        function displayResults() {
+            const resultsContainer = document.getElementById('results-container');
+            const scoreContainer = document.getElementById('score');
+            const percentageContainer = document.getElementById('percentage');
+            const feedbackContainer = document.getElementById('feedback');
+            const correctCountContainer = document.getElementById('correctCount');
+            const incorrectCountContainer = document.getElementById('incorrectCount');
+
+            const userAnswers = JSON.parse(localStorage.getItem("userAnswers")); // Retrieve answers from local storage
+            const score = localStorage.getItem("score"); // Retrieve score from local storage
+            const totalQuestions = questions.length;
+
+            scoreContainer.innerText = score;
+            const percentage = (score / totalQuestions) * 100;
+            percentageContainer.innerText = `Percentage: ${percentage.toFixed(2)}%`;
+
+            // Provide feedback based on the percentage score
+            if (percentage >= 80) {
+                feedbackContainer.innerText = "Great job!";
+            } else if (percentage >= 50) {
+                feedbackContainer.innerText = "Good effort, keep trying!";
+            } else {
+                feedbackContainer.innerText = "Don't give up, practice makes perfect!";
+            }
+
+            let correctCount = 0;
+            userAnswers.forEach((userAnswer, index) => {
+                const question = questions[index];
+                const correctAnswer = question.answer;
+
+                const userAnswerText = question.options[userAnswer];
+                const correctAnswerText = question.options[correctAnswer];
+
+                const rowClass = userAnswer === correctAnswer ? 'correct' : 'incorrect';
+                if (userAnswer === correctAnswer) {
+                    correctCount++;
+                }
+
+                resultsContainer.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td>${question.question}</td>
+                        <td>${userAnswerText}</td>
+                        <td>${correctAnswerText}</td>
+                    </tr>
+                `;
+            });
+
+            correctCountContainer.innerText = `Correct Answers: ${correctCount} / ${totalQuestions}`;
+            incorrectCountContainer.innerText = `Incorrect Answers: ${totalQuestions - correctCount} / ${totalQuestions}`;
+        }
+
+        function goHome() {
+            window.location.href = 'index.html'; // Change to your homepage
+        }
+
+        function retakeQuiz() {
+            localStorage.removeItem("userAnswers"); // Clear previous answers
+            localStorage.removeItem("score"); // Clear previous score
+            window.location.href = 'quiz.html'; // Redirect to quiz page
+        }
+
+        // Call displayResults() when the page loads
+        displayResults();
+    </script>
+
+</body>
+</html>
