@@ -13,8 +13,5 @@ Welcome to the **Interactive Quiz Application**! This project is a dynamic web-b
 
 ---
 
-## Project Structure
 
-/project-folder ├── index.html # Homepage for the quiz application ├── quiz.html # Quiz page where questions are presented ├── results.html # Results page displaying quiz outcomes ├── styles.css # Styling for all HTML pages ├── script.js # Core logic for question handling and scoring
 
-└── quizpage.jpeg
